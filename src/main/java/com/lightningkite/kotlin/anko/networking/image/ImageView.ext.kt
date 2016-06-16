@@ -1,16 +1,16 @@
-package com.ivieleague.kotlin.anko.networking.image
+package com.lightningkite.kotlin.anko.networking.image
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.view.View
 import android.widget.ImageView
-import com.ivieleague.kotlin.anko.image.getBitmapFromUri
-import com.ivieleague.kotlin.anko.isAttachedToWindowCompat
-import com.ivieleague.kotlin.async.doAsync
-import com.ivieleague.kotlin.networking.NetMethod
-import com.ivieleague.kotlin.networking.NetRequest
-import com.ivieleague.kotlin.networking.Networking
+import com.lightningkite.kotlin.anko.image.getBitmapFromUri
+import com.lightningkite.kotlin.anko.isAttachedToWindowCompat
+import com.lightningkite.kotlin.async.doAsync
+import com.lightningkite.kotlin.networking.NetMethod
+import com.lightningkite.kotlin.networking.NetRequest
+import com.lightningkite.kotlin.networking.Networking
 import org.jetbrains.anko.imageBitmap
 import java.io.File
 import java.util.*

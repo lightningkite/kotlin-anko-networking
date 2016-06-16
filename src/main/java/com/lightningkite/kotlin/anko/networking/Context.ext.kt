@@ -1,4 +1,4 @@
-package com.ivieleague.kotlin.anko.networking
+package com.lightningkite.kotlin.anko.networking
 
 import android.content.Context
 import org.jetbrains.anko.connectivityManager

@@ -1,9 +1,9 @@
-package com.ivieleague.kotlin.anko.networking
+package com.lightningkite.kotlin.anko.networking
 
 import android.content.Context
-import com.ivieleague.kotlin.files.child
-import com.ivieleague.kotlin.networking.load
-import com.ivieleague.kotlin.networking.save
+import com.lightningkite.kotlin.files.child
+import com.lightningkite.kotlin.networking.load
+import com.lightningkite.kotlin.networking.save
 import java.lang.reflect.Type
 
 /**

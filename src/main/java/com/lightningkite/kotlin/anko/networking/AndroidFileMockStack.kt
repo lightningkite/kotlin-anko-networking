@@ -1,10 +1,10 @@
-package com.ivieleague.kotlin.anko.networking
+package com.lightningkite.kotlin.anko.networking
 
 import android.content.Context
-import com.ivieleague.kotlin.networking.NetRequest
-import com.ivieleague.kotlin.networking.NetStack
-import com.ivieleague.kotlin.networking.NetStream
-import com.ivieleague.kotlin.stream.toByteArray
+import com.lightningkite.kotlin.networking.NetRequest
+import com.lightningkite.kotlin.networking.NetStack
+import com.lightningkite.kotlin.networking.NetStream
+import com.lightningkite.kotlin.stream.toByteArray
 import java.io.File
 import java.io.IOException
 

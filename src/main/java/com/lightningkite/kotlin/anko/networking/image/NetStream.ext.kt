@@ -1,8 +1,8 @@
-package com.ivieleague.kotlin.anko.networking.image
+package com.lightningkite.kotlin.anko.networking.image
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import com.ivieleague.kotlin.networking.NetStream
+import com.lightningkite.kotlin.networking.NetStream
 
 /**
  * Represents a response from the network.
