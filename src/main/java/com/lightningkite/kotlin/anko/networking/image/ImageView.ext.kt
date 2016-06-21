@@ -80,8 +80,13 @@ fun ImageView.imageStreamExif(context: Context, request: NetRequest, maxDimensio
     doAsync({
         val stream = Networking.stream(request)
         if (stream.isSuccessful) {
-            stream.download(tempFile)
-            context.getBitmapFromUri(Uri.fromFile(tempFile), maxDimension)
+            try {
+                stream.download(tempFile)
+                context.getBitmapFromUri(Uri.fromFile(tempFile), maxDimension)
+            } catch(e: Exception) {
+                e.printStackTrace()
+                null
+            }
         } else {
             null
         }
