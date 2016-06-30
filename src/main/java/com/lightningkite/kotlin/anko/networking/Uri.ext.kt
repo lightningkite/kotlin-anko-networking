@@ -14,7 +14,7 @@ fun Uri.toNetBody(resolver: ContentResolver): NetBody.StreamBody {
     val type = resolver.getType(this) ?: throw IllegalArgumentException()
     val size = resolver.fileSize(this) ?: throw IllegalArgumentException()
     return NetBody.StreamBody(
-            NetContentType(type),
+            NetContentType.fromString(type),
             size,
             resolver.openInputStream(this)
     )
