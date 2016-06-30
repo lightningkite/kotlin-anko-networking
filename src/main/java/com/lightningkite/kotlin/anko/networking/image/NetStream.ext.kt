@@ -1,8 +1,12 @@
 package com.lightningkite.kotlin.anko.networking.image
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
+import com.lightningkite.kotlin.anko.image.getBitmapFromUri
 import com.lightningkite.kotlin.networking.NetStream
+import java.io.File
 
 /**
  * Represents a response from the network.
@@ -24,12 +28,24 @@ fun NetStream.bitmap(options: BitmapFactory.Options = BitmapFactory.Options()): 
 
 fun NetStream.bitmapSized(minBytes: Long): Bitmap? {
     val opts = BitmapFactory.Options().apply {
-        inSampleSize = (length / minBytes).toInt()
+        inSampleSize = ImageUtils.calculateInSampleSize(length, minBytes)
     }
     try {
         return readStream {
             BitmapFactory.decodeStream(it, null, opts)
         }
+    } catch(e: Exception) {
+        e.printStackTrace()
+        return null
+    }
+}
+
+fun NetStream.bitmapExif(context: Context, minBytes: Long): BitmapHolder? {
+    try {
+        val tempFile = File.createTempFile("image", "jpg", context.cacheDir)
+        download(tempFile)
+        val bitmap = context.getBitmapFromUri(Uri.fromFile(tempFile), minBytes)
+        return if (bitmap != null) BitmapHolder(tempFile, bitmap) else null
     } catch(e: Exception) {
         e.printStackTrace()
         return null

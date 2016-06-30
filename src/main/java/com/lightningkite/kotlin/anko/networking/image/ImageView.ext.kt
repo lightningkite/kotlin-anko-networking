@@ -2,17 +2,17 @@ package com.lightningkite.kotlin.anko.networking.image
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import android.view.View
 import android.widget.ImageView
-import com.lightningkite.kotlin.anko.image.getBitmapFromUri
+import com.lightningkite.kotlin.Disposable
 import com.lightningkite.kotlin.anko.isAttachedToWindowCompat
 import com.lightningkite.kotlin.async.doAsync
 import com.lightningkite.kotlin.networking.NetMethod
 import com.lightningkite.kotlin.networking.NetRequest
+import com.lightningkite.kotlin.networking.NetStream
 import com.lightningkite.kotlin.networking.Networking
 import org.jetbrains.anko.imageBitmap
-import java.io.File
+import org.jetbrains.anko.imageResource
 import java.util.*
 
 /**
@@ -25,114 +25,81 @@ import java.util.*
 val ImageView_previousBitmap: MutableMap<ImageView, Bitmap> = HashMap()
 val ImageView_previousListener: MutableMap<ImageView, View.OnAttachStateChangeListener> = HashMap()
 
-inline fun ImageView.imageStream(url: String, minBytes: Long? = null, crossinline onResult: (Boolean) -> Unit)
-        = imageStream(NetRequest(NetMethod.GET, url), minBytes, onResult)
+@Deprecated("Use imageStreamSized instead.")
+inline fun ImageView.imageStream(url: String, minBytes: Long = Long.MAX_VALUE, crossinline onResult: (Boolean) -> Unit)
+        = imageStreamSized(NetRequest(NetMethod.GET, url), minBytes, onResult = { onResult(it != null) })
 
-inline fun ImageView.imageStream(request: NetRequest, minBytes: Long? = null, crossinline onResult: (Boolean) -> Unit) {
-    doAsync({
-        val stream = Networking.stream(request)
-        if (stream.isSuccessful) {
-            if (minBytes != null) {
-                stream.bitmapSized(minBytes)
-            } else {
-                stream.bitmap()
+@Deprecated("Use imageStreamSized instead.")
+inline fun ImageView.imageStream(request: NetRequest, minBytes: Long = Long.MAX_VALUE, crossinline onResult: (Boolean) -> Unit)
+        = imageStreamSized(request, minBytes, onResult = { onResult(it != null) })
+
+inline fun ImageView.imageStreamSized(request: NetRequest, minBytes: Long = Long.MAX_VALUE, brokenImageResource: Int? = null, crossinline onResult: (Disposable?) -> Unit) {
+    imageStreamCustom(request, howToStream = {
+        val bitmap = bitmapSized(minBytes)
+        if (bitmap == null) null else bitmap to object : Disposable {
+            override fun dispose() {
+                bitmap.recycle()
             }
-        } else {
-            null
         }
-    }, {
-        if (it == null) {
-            onResult(false)
-        } else {
-            if (!isAttachedToWindowCompat()) {
-                it.recycle()
-                return@doAsync
-            }
-
-            imageBitmap = it
-            val newListener = object : View.OnAttachStateChangeListener {
-                override fun onViewDetachedFromWindow(v: View?) {
-                    setImageDrawable(null)
-                    it.recycle()
-                    ImageView_previousBitmap.remove(this@imageStream)
-                    removeOnAttachStateChangeListener(this)
-                }
-
-                override fun onViewAttachedToWindow(v: View?) {
-                }
-            }
-
-            ImageView_previousBitmap[this]?.recycle()
-            ImageView_previousBitmap[this] = it
-            if (ImageView_previousListener[this] != null) {
-                removeOnAttachStateChangeListener(ImageView_previousListener[this])
-            }
-            ImageView_previousListener[this] = newListener
-            addOnAttachStateChangeListener(ImageView_previousListener[this])
-
-            onResult(true)
-        }
-    })
+    }, brokenImageResource = brokenImageResource, onResult = onResult)
 }
 
-fun ImageView.imageStreamExif(context: Context, request: NetRequest, maxDimension: Int = Int.MAX_VALUE, onResult: (Boolean) -> Unit) {
-    val tempFile = File.createTempFile("image", "jpg", context.cacheDir)
+fun ImageView.imageStreamExif(context: Context, request: NetRequest, minBytes: Long = Long.MAX_VALUE, brokenImageResource: Int? = null, onResult: (Disposable?) -> Unit) {
+    imageStreamCustom(request, howToStream = {
+        val holder = bitmapExif(context, minBytes)
+        if (holder == null) null else holder.bitmap to holder
+    }, brokenImageResource = brokenImageResource, onResult = onResult)
+}
+
+val ImageView_previousDisposable: MutableMap<ImageView, Disposable> = HashMap()
+inline fun ImageView.imageStreamCustom(request: NetRequest, crossinline howToStream: NetStream.() -> Pair<Bitmap, Disposable>?, brokenImageResource: Int? = null, crossinline onResult: (Disposable?) -> Unit) {
     doAsync({
-        val stream = Networking.stream(request)
-        if (stream.isSuccessful) {
-            try {
-                stream.download(tempFile)
-                context.getBitmapFromUri(Uri.fromFile(tempFile), maxDimension)
-            } catch(e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        } else {
-            null
-        }
+        Networking.stream(request).ifSuccessful?.howToStream()
     }, {
         if (it == null) {
-            onResult(false)
+            //It failed, so use the broken image.
+            if (brokenImageResource != null) {
+                imageResource = brokenImageResource
+            }
+            onResult(null)
         } else {
+            //cancel if this isn't attached.
             if (!isAttachedToWindowCompat()) {
-                it.recycle()
-                try {
-                    tempFile.delete()
-                } catch(e: Exception) {/*Squish*/
-                }
+                it.second.dispose()
                 return@doAsync
             }
 
-            imageBitmap = it
-            val newListener = object : View.OnAttachStateChangeListener {
+            //setup a listener with disposal for recycling the image and removing itself
+            val newListener = object : View.OnAttachStateChangeListener, Disposable {
+                var disposed = false
                 override fun onViewDetachedFromWindow(v: View?) {
-                    setImageDrawable(null)
-                    it.recycle()
-                    ImageView_previousBitmap.remove(this@imageStreamExif)
-                    removeOnAttachStateChangeListener(this)
-                    try {
-                        tempFile.delete()
-                    } catch(e: Exception) {/*Squish*/
-                    }
+                    dispose()
                 }
 
                 override fun onViewAttachedToWindow(v: View?) {
                 }
-            }
 
-            ImageView_previousBitmap[this]?.recycle()
-            ImageView_previousBitmap[this] = it
-            if (ImageView_previousListener[this] != null) {
-                removeOnAttachStateChangeListener(ImageView_previousListener[this])
-                try {
-                    tempFile.delete()
-                } catch(e: Exception) {/*Squish*/
+                override fun dispose() {
+                    if (disposed) return else disposed = true
+                    setImageDrawable(null)
+                    it.second.dispose()
+                    ImageView_previousDisposable.remove(this@imageStreamCustom)
+                    removeOnAttachStateChangeListener(this)
                 }
             }
-            ImageView_previousListener[this] = newListener
-            addOnAttachStateChangeListener(ImageView_previousListener[this])
 
-            onResult(true)
+            //Remove old listener of this kind
+            ImageView_previousDisposable[this]?.dispose()
+
+            //set the image
+            imageBitmap = it.first
+
+            //add new listener
+            ImageView_previousDisposable[this] = newListener
+            addOnAttachStateChangeListener(newListener)
+
+            //Return the listener as a disposable to dispose the image on demand
+            onResult(newListener)
         }
     })
 }
