@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import com.lightningkite.kotlin.anko.image.ImageUtils
 import com.lightningkite.kotlin.anko.image.getBitmapFromUri
 import com.lightningkite.kotlin.networking.NetStream
 import java.io.File
