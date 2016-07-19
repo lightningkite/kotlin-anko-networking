@@ -44,9 +44,16 @@ inline fun ImageView.imageStreamSized(request: NetRequest, minBytes: Long = Long
     }, brokenImageResource = brokenImageResource, onResult = onResult)
 }
 
-fun ImageView.imageStreamExif(context: Context, request: NetRequest, minBytes: Long = Long.MAX_VALUE, brokenImageResource: Int? = null, onResult: (Disposable?) -> Unit) {
+fun ImageView.imageStreamExif(context: Context, request: NetRequest, minBytes: Long, brokenImageResource: Int? = null, onResult: (Disposable?) -> Unit) {
     imageStreamCustom(request, howToStream = {
         val holder = bitmapExif(context, minBytes)
+        if (holder == null) null else holder.bitmap to holder
+    }, brokenImageResource = brokenImageResource, onResult = onResult)
+}
+
+fun ImageView.imageStreamExif(context: Context, request: NetRequest, maxWidth: Int = 2048, maxHeight: Int = 2048, brokenImageResource: Int? = null, onResult: (Disposable?) -> Unit) {
+    imageStreamCustom(request, howToStream = {
+        val holder = bitmapExif(context, maxWidth, maxHeight)
         if (holder == null) null else holder.bitmap to holder
     }, brokenImageResource = brokenImageResource, onResult = onResult)
 }

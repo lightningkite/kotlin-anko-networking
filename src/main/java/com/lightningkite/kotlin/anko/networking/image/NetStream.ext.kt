@@ -52,3 +52,15 @@ fun NetStream.bitmapExif(context: Context, minBytes: Long): BitmapHolder? {
         return null
     }
 }
+
+fun NetStream.bitmapExif(context: Context, maxWidth: Int, maxHeight: Int): BitmapHolder? {
+    try {
+        val tempFile = File.createTempFile("image", "jpg", context.cacheDir)
+        download(tempFile)
+        val bitmap = context.getBitmapFromUri(Uri.fromFile(tempFile), maxWidth, maxHeight)
+        return if (bitmap != null) BitmapHolder(tempFile, bitmap) else null
+    } catch(e: Exception) {
+        e.printStackTrace()
+        return null
+    }
+}
