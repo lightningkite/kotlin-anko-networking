@@ -11,7 +11,7 @@ import com.lightningkite.kotlin.networking.NetContentType
  */
 
 fun Uri.toNetBody(resolver: ContentResolver): NetBody.StreamBody {
-    val type = resolver.getType(this) ?: throw IllegalArgumentException()
+    val type = resolver.getType(this) ?: pathSegments.lastOrNull()?.split('.')?.lastOrNull() ?: throw IllegalArgumentException()
     val size = resolver.fileSize(this) ?: throw IllegalArgumentException()
     return NetBody.StreamBody(
             NetContentType.fromString(type),
@@ -21,7 +21,7 @@ fun Uri.toNetBody(resolver: ContentResolver): NetBody.StreamBody {
 }
 
 fun NetBody.Companion.fromUri(uri: Uri, resolver: ContentResolver): NetBody {
-    val type = resolver.getType(uri) ?: throw IllegalArgumentException()
+    val type = resolver.getType(uri) ?: uri.pathSegments.lastOrNull()?.split('.')?.lastOrNull() ?: throw IllegalArgumentException()
     val size = resolver.fileSize(uri) ?: throw IllegalArgumentException()
     return NetBody.StreamBody(
             NetContentType.fromString(type),
