@@ -19,3 +19,13 @@ fun Uri.toNetBody(resolver: ContentResolver): NetBody.StreamBody {
             resolver.openInputStream(this)
     )
 }
+
+fun NetBody.Companion.fromUri(uri: Uri, resolver: ContentResolver): NetBody {
+    val type = resolver.getType(uri) ?: throw IllegalArgumentException()
+    val size = resolver.fileSize(uri) ?: throw IllegalArgumentException()
+    return NetBody.StreamBody(
+            NetContentType.fromString(type),
+            size,
+            resolver.openInputStream(uri)
+    )
+}
