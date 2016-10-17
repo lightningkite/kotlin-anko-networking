@@ -33,6 +33,8 @@ inline fun ImageView.imageStream(url: String, minBytes: Long = Long.MAX_VALUE, c
 inline fun ImageView.imageStream(request: NetRequest, minBytes: Long = Long.MAX_VALUE, crossinline onResult: (Boolean) -> Unit)
         = imageStreamSized(request, minBytes, onResult = { onResult(it != null) })
 
+inline fun ImageView.imageStreamSized(request: NetRequest, minBytes: Long = Long.MAX_VALUE, brokenImageResource: Int? = null)
+        = imageStreamSized(request, minBytes, brokenImageResource, {})
 inline fun ImageView.imageStreamSized(request: NetRequest, minBytes: Long = Long.MAX_VALUE, brokenImageResource: Int? = null, crossinline onResult: (Disposable?) -> Unit) {
     imageStreamCustom(request, howToStream = {
         val bitmap = bitmapSized(minBytes)
