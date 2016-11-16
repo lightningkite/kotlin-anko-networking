@@ -2,12 +2,12 @@ package com.lightningkite.kotlin.anko.networking
 
 import android.net.Uri
 import android.widget.ImageView
+import com.lightningkite.kotlin.anko.image.getBitmapFromUri
 import com.lightningkite.kotlin.anko.networking.image.lambdaBitmapExif
 import com.lightningkite.kotlin.async.invokeAsync
 import okhttp3.Request
 import org.jetbrains.anko.imageBitmap
 import org.jetbrains.anko.imageResource
-import org.jetbrains.anko.imageURI
 
 /**
  * Created by joseph on 11/11/16.
@@ -44,7 +44,7 @@ fun ImageView.imageAnyUri(
             }
         } else {
             try {
-                imageURI = Uri.parse(uri)
+                imageBitmap = context.getBitmapFromUri(Uri.parse(uri), 2048, 2048)!!
                 onComplete(true)
             } catch(e: Exception) {
                 if (brokenImageResource != null) {
