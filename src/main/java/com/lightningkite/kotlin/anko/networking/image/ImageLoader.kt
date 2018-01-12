@@ -2,9 +2,7 @@ package com.lightningkite.kotlin.anko.networking.image
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.lightningkite.kotlin.Disposable
-import com.lightningkite.kotlin.async.invokeAsync
-import com.lightningkite.kotlin.invokeAll
+import com.lightningkite.kotlin.lambda.invokeAll
 import com.lightningkite.kotlin.networking.TypedResponse
 import okhttp3.Request
 
