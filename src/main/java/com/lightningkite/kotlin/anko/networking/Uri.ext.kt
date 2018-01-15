@@ -7,9 +7,8 @@ import okhttp3.MediaType
 import okhttp3.RequestBody
 
 /**
- * Created by jivie on 6/2/16.
+ * Converts a [Uri] into a [RequestBody] using a content [resolver].
  */
-
 fun Uri.toRequestBody(resolver: ContentResolver): RequestBody {
     val type = resolver.getType(this) ?: pathSegments.lastOrNull()?.split('.')?.lastOrNull() ?: throw IllegalArgumentException()
     return okhttp3.RequestBody.create(MediaType.parse(type), resolver.openInputStream(this).toByteArray())
