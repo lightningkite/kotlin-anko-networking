@@ -10,6 +10,7 @@ import org.jetbrains.anko.imageBitmap
 import org.jetbrains.anko.imageResource
 
 /**
+ *
  * Created by joseph on 11/11/16.
  */
 
